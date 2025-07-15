@@ -80,6 +80,7 @@ async function pullLatestCode() {
     const s = spinner();
     s.start("Finalizing CLI access...");
     try {
+      await execa("bun", ["run", "build"], { cwd: CLI_PATH });
       await execa("npm", ["link"], { cwd: CLI_PATH });
       s.stop("🔗 codr CLI is now available.");
     } catch (err) {

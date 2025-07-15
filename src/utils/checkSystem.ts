@@ -21,7 +21,7 @@ const installCommands: Record<string, () => Promise<void>> = {
   uv: async () => {
     const platform = os.platform();
     if (platform === "win32") {
-      await execaCommand("python3 -m pip install uv", { shell: true });
+      await execaCommand("pip install uv", { shell: true });
     } else {
       await execaCommand("curl -LsSf https://astral.sh/uv/install.sh | sh", {
         shell: true,

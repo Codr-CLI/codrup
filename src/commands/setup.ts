@@ -23,7 +23,7 @@ export async function runSetup() {
   await cloneRepo(installPath);
   await installNodeDeps(installPath);
   await setupPythonEnv(installPath);
-  await configureEnv();
+  await configureEnv(installPath);
   await linkGlobally(installPath);
 
   outro(`🎉 ${color.green("codr is ready!")}
@@ -89,33 +89,30 @@ async function installNodeDeps(installPath: string) {
   }
 }
 
-async function setupPythonEnv(installPath: string) {
+export async function setupPythonEnv(installPath: string) {
   const ragPath = path.join(installPath, "apps", "rag-py");
   const venvPath = path.join(ragPath, ".venv");
+
   const s = spinner();
-  s.start("Finalizing system...");
+  s.start("⚙️  Finalizing Python environment...");
+
   try {
-    await execa("uv", ["venv", ".venv"], { cwd: ragPath });
+    await execa("uv", ["venv", venvPath], { cwd: ragPath });
 
-    const pythonBin =
-      os.platform() === "win32"
-        ? path.join(venvPath, "Scripts", "python.exe")
-        : path.join(venvPath, "bin", "python");
-
-    await execa(pythonBin, ["-m", "pip", "install", "-r", "requirements.txt"], {
+    await execa("uv", ["pip", "install", "-r", "requirements.txt", "--python", path.join(venvPath, "bin", "python")], {
       cwd: ragPath,
     });
 
-    s.stop("🧠 AI backend ready.");
+    s.stop(`✅ ${color.green("AI backend ready.")}`);
   } catch (err) {
     s.stop("❌ Python environment setup failed.");
     outro(getMsg(err));
   }
 }
 
-async function configureEnv() {
+async function configureEnv(installPath: string) {
   try {
-    await runConfig();
+    await runConfig(installPath);
   } catch (err) {
     outro("⚠️ Skipping config setup due to error:");
     console.error(getMsg(err));
@@ -127,7 +124,7 @@ async function linkGlobally(installPath: string) {
   const s = spinner();
   s.start("Making codr available globally...");
   try {
-    await execa("bun", ["link"], { cwd: cliPath });
+    await execa("npm", ["link"], { cwd: cliPath });
     s.stop("🔗 codr installed.");
   } catch (err) {
     s.stop("❌ Global linking failed.");
