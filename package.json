@@ -1,0 +1,42 @@
+{
+  "name": "codrup",
+  "version": "0.1.3",
+  "description": "Installer CLI for setting up the codr AI toolchain",
+  "type": "module",
+  "bin": {
+    "codrup": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "bun src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "codr",
+    "ai",
+    "cli",
+    "installer",
+    "tooling",
+    "devtools"
+  ],
+  "author": "Anish Roy <your-email@example.com>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pshycodr/codr"
+  },
+  "engines": {
+    "bun": ">=1.1.0"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "commander": "^11.1.0",
+    "execa": "^8.0.1",
+    "picocolors": "^1.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}
