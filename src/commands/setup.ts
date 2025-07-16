@@ -90,16 +90,19 @@ async function installNodeDeps(installPath: string) {
 }
 
 export async function setupPythonEnv(installPath: string) {
-  const ragPath = path.join(installPath, "apps", "rag-py");
+  const ragPath = path.join(installPath, ".");
   const venvPath = path.join(ragPath, ".venv");
 
   const s = spinner();
   s.start("⚙️  Finalizing Python environment...");
 
   try {
-    await execa("uv", ["venv", venvPath], { cwd: ragPath });
+    await execa("uv", ["venv", venvPath], {
+      cwd: ragPath,
+      stdio: "inherit",
+    });
 
-    await execa("uv", ["pip", "install", "-r", "requirements.txt", "--python", path.join(venvPath, "bin", "python")], {
+    await execa("uv", ["pip", "install", "-r", "requirements.txt", "--python", path.join(venvPath, "./")], {
       cwd: ragPath,
     });
 

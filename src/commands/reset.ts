@@ -46,7 +46,7 @@ export async function runReset() {
     await runSetup();
   } else {
     outro("🧹 codr has been reset. You can re-install later using:");
-    console.log(color.cyan("codr-installer --setup"));
+    console.log(color.cyan("codrup --setup"));
   }
 }
 
