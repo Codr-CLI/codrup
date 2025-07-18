@@ -13,7 +13,7 @@ export async function runUpdate() {
   intro(`${color.bgBlue(color.black(" codr update "))}`);
 
   if (!fs.existsSync(CODR_ROOT)) {
-    outro("❌ codr is not installed. Run `codr-installer --setup` first.");
+    outro("❌ codr is not installed. Run `codrup --setup` first.");
     process.exit(1);
   }
 
@@ -48,6 +48,7 @@ async function pullLatestCode() {
     s.start("Refreshing environment...");
     try {
       await execa("bun", ["install"], { cwd: CLI_PATH });
+      await execa("bun", ["run", "build"], { cwd: CLI_PATH });
       s.stop("📦 environment refreshed.");
     } catch (err) {
       s.stop("❌ Node update failed.");
