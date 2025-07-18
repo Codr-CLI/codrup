@@ -128,6 +128,7 @@ async function linkGlobally(installPath: string) {
   const s = spinner();
   s.start("Making codr available globally...");
   try {
+    await execa("bun", ["run", "build"], { cwd: cliPath });
     await execa("npm", ["link"], { cwd: cliPath });
     s.stop("🔗 codr installed.");
     welcomeScreen()

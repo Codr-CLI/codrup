@@ -1,6 +1,6 @@
 {
   "name": "codrup",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Installer CLI for setting up the codr AI toolchain",
   "type": "module",
   "bin": {
