@@ -6,6 +6,7 @@ import path from "node:path";
 import os from "node:os";
 import { checkDependencies } from "../utils/checkSystem";
 import { runConfig } from "./config";
+import { welcomeScreen } from "../utils/welcomeScreen";
 
 const DEFAULT_INSTALL_PATH = path.join(os.homedir(), ".codr");
 const GIT_REPO = "https://github.com/pshycodr/codr";
@@ -129,6 +130,7 @@ async function linkGlobally(installPath: string) {
   try {
     await execa("npm", ["link"], { cwd: cliPath });
     s.stop("🔗 codr installed.");
+    welcomeScreen()
   } catch (err) {
     s.stop("❌ Global linking failed.");
     outro(getMsg(err));
