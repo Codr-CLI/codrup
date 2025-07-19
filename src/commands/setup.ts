@@ -24,8 +24,10 @@ export async function runSetup() {
   await cloneRepo(installPath);
   await installNodeDeps(installPath);
   await setupPythonEnv(installPath);
-  await configureEnv(installPath);
+  const configInfo = await configureEnv(installPath);
   await linkGlobally(installPath);
+
+  writeMetaFile(installPath, configInfo);
 
   outro(`🎉 ${color.green("codr is ready!")}
 
@@ -34,6 +36,7 @@ You can now run:
 
 Anywhere in your terminal ✨`);
 }
+
 
 
 async function promptInstallPath(): Promise<string> {
@@ -116,10 +119,12 @@ export async function setupPythonEnv(installPath: string) {
 
 async function configureEnv(installPath: string) {
   try {
-    await runConfig(installPath);
+    const config = await runConfig(installPath);
+    return config;
   } catch (err) {
     outro("⚠️ Skipping config setup due to error:");
     console.error(getMsg(err));
+    return null;
   }
 }
 
@@ -140,4 +145,29 @@ async function linkGlobally(installPath: string) {
 
 function getMsg(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+function getCurrentVersion(installPath: string): string {
+  try {
+    const pkgJson = fs.readFileSync(path.join(installPath, "apps", "cli-ts", "package.json"), "utf-8");
+    return JSON.parse(pkgJson).version ?? "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
+
+function writeMetaFile(installPath: string, config?: any) {
+  const meta = {
+    installPath,
+    pythonVenvPath: path.join(installPath, ".venv"),
+    installDate: new Date().toISOString(),
+    lastUpdated: new Date().toISOString(),
+    platform: process.platform,
+    version: getCurrentVersion(installPath),
+    userConfig: config || {}
+  };
+
+  const metaPath = path.join(installPath, "meta.json");
+  fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
 }

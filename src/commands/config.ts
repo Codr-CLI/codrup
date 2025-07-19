@@ -53,7 +53,12 @@ const PROVIDERS = {
   },
 } as const;
 
-export async function runConfig(targetPath: string) {
+export async function runConfig(targetPath: string): Promise<{
+  selectedLLM: string;
+  llmModel: string;
+  llmKeyName: string;
+  openRouterKey: string | null;
+}>{
   intro(`${color.bgMagenta(color.black(" codr config "))}`);
 
   let llm: keyof typeof PROVIDERS;
@@ -143,6 +148,12 @@ export async function runConfig(targetPath: string) {
 
     fs.writeFileSync(ENV_PATH, envLines.join("\n") + "\n", "utf-8");
     outro(`✅ ${color.green(".env file created successfully at")} ${ENV_PATH}`);
+    return {
+      selectedLLM: llm,
+      llmModel: model,
+      llmKeyName: PROVIDERS[llm].keyName,
+      openRouterKey,
+    };
   } catch (err) {
     outro(`❌ Failed to write .env file: ${color.red(getMsg(err))}`);
     process.exit(1);

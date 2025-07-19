@@ -4,8 +4,15 @@ import { runSetup } from "./commands/setup";
 import { runConfig } from "./commands/config";
 import { runUpdate } from "./commands/update";
 import { runReset } from "./commands/reset";
+import os from "node:os";
+import path from "node:path";
 
 const program = new Command();
+
+
+const targetPath = path.join(os.homedir(), ".codr", "config.json");
+await runConfig(targetPath);
+
 
 program
   .name("codr-installer")
@@ -23,7 +30,7 @@ const options = program.opts();
 if (options.setup) {
   await runSetup();
 } else if (options.config) {
-  await runConfig();
+  await runConfig(targetPath);
 } else if (options.update) {
   await runUpdate();
 } else if (options.reset) {
