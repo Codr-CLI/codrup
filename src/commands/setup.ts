@@ -27,7 +27,7 @@ export async function runSetup() {
   const configInfo = await configureEnv(installPath);
   await linkGlobally(installPath);
 
-  writeMetaFile(installPath, configInfo);
+  writeMetaFile(DEFAULT_INSTALL_PATH, configInfo);
 
   outro(`🎉 ${color.green("codr is ready!")}
 
