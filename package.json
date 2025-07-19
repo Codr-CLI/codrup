@@ -7,7 +7,7 @@
     "codrup": "./dist/index.js"
   },
   "scripts": {
-    "dev": "bun src/index.ts",
+    "dev": "bun dist/index.js",
     "build": "bun build src/index.ts --outdir dist --target bun",
     "prepublishOnly": "bun run build"
   },
