@@ -8,11 +8,7 @@ import os from "node:os";
 import path from "node:path";
 
 const program = new Command();
-
-
 const targetPath = path.join(os.homedir(), ".codr", "config.json");
-await runConfig(targetPath);
-
 
 program
   .name("codr-installer")
@@ -24,7 +20,6 @@ program
   .option("--reset", "Delete and reset codr installation");
 
 program.parse(process.argv);
-
 const options = program.opts();
 
 if (options.setup) {
