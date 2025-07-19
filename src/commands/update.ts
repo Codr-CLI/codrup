@@ -19,14 +19,12 @@ export async function runUpdate() {
 
   const meta = readMetaFile();
 
-  const CLI_PATH = path.join(meta.installPath, "apps", "cli-ts");
-  const RAG_PATH = path.join(meta.installPath, "apps", "rag-py");
 
   // --- Step 2: Run update steps ---
   await pullLatestCode(meta.installPath);
-  await updateNodeDeps(CLI_PATH);
-  await updatePythonDeps(RAG_PATH, meta.pythonVenvPath);
-  await linkGlobally(CLI_PATH);
+  await updateNodeDeps(meta.installPath);
+  await updatePythonDeps(meta.installPath);
+  await linkGlobally(meta.installPath);
 
   updateLastUpdated();
 
@@ -87,22 +85,27 @@ async function updateNodeDeps(cliPath: string) {
   }
 }
 
-async function updatePythonDeps(ragPath: string, venvPath: string) {
-  const s = spinner();
-  s.start("Updating codr Brain...");
-  try {
-    const pythonBin =
-      os.platform() === "win32"
-        ? path.join(venvPath, "Scripts", "python.exe")
-        : path.join(venvPath, "bin", "python");
 
-    await execa(pythonBin, ["-m", "pip", "install", "-r", "requirements.txt"], {
+export async function updatePythonDeps(installPath: string) {
+  const ragPath = path.join(installPath, ".");
+  const venvPath = path.join(ragPath, ".venv");
+
+  const s = spinner();
+  s.start("⚙️  Finalizing Python environment...");
+
+  try {
+    await execa("uv", ["venv", venvPath], {
+      cwd: ragPath,
+      stdio: "inherit",
+    });
+
+    await execa("uv", ["pip", "install", "-r", "requirements.txt", "--python", path.join(venvPath, "./")], {
       cwd: ragPath,
     });
 
-    s.stop("🧠 Brain updated.");
+    s.stop(`✅ ${color.green("AI backend ready.")}`);
   } catch (err) {
-    s.stop("❌ Python update failed.");
+    s.stop("❌ Python environment setup failed.");
     outro(getMsg(err));
   }
 }
