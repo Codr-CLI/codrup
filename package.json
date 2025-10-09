@@ -1,6 +1,6 @@
 {
   "name": "codrup",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "Installer CLI for setting up the codr AI toolchain",
   "type": "module",
   "bin": {
@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
+    "chalk": "^5.6.2",
     "commander": "^11.1.0",
     "execa": "^8.0.1",
     "picocolors": "^1.0.0"

@@ -58,7 +58,7 @@ export async function runConfig(targetPath: string): Promise<{
   llmModel: string;
   llmKeyName: string;
   openRouterKey: string | null;
-}>{
+}> {
   intro(`${color.bgMagenta(color.black(" codr config "))}`);
 
   let llm: keyof typeof PROVIDERS;
@@ -68,7 +68,7 @@ export async function runConfig(targetPath: string): Promise<{
 
   // --- Step 1: Select LLM Provider ---
   try {
-    const res = await select({
+    const res: any = await select({
       message: "Select your LLM provider:",
       options: Object.entries(PROVIDERS).map(([value, { name }]) => ({
         value,
@@ -86,7 +86,7 @@ export async function runConfig(targetPath: string): Promise<{
 
   // --- Step 2: Select model ---
   try {
-    const res = await select({
+    const res: any = await select({
       message: `Choose a model from ${PROVIDERS[llm].name}:`,
       options: PROVIDERS[llm].models.map((m) => ({ value: m, label: m })),
     });
@@ -132,6 +132,8 @@ export async function runConfig(targetPath: string): Promise<{
     `SELECTED_LLM=${llm}`,
     `LLM_MODEL=${model}`,
     `${PROVIDERS[llm].keyName}=${llmKey}`,
+    `GOOGLE_CSE_API_KEY=AIzaSyDYGqVZyVcTDdfuO3cgHnpQrV0ealD0Pag`,
+    `GOOGLE_CSE_ID=a5ad26b8dd2f64e96`
   ];
 
   if (openRouterKey) {
