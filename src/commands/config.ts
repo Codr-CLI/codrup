@@ -80,7 +80,7 @@ export async function runConfig(targetPath: string): Promise<{
 
     llm = res;
   } catch (err) {
-    outro(`❌ Error choosing provider: ${color.red(getMsg(err))}`);
+    outro(`✕ Error choosing provider: ${color.red(getMsg(err))}`);
     process.exit(1);
   }
 
@@ -94,7 +94,7 @@ export async function runConfig(targetPath: string): Promise<{
     if (isCancel(res)) throw new Error("User cancelled model selection.");
     model = res;
   } catch (err) {
-    outro(`❌ Error choosing model: ${color.red(getMsg(err))}`);
+    outro(`✕ Error choosing model: ${color.red(getMsg(err))}`);
     process.exit(1);
   }
 
@@ -109,39 +109,33 @@ export async function runConfig(targetPath: string): Promise<{
     if (isCancel(res)) throw new Error("User cancelled key input.");
     llmKey = res.trim();
   } catch (err) {
-    outro(`❌ Error collecting API key: ${color.red(getMsg(err))}`);
+    outro(`✕ Error collecting API key: ${color.red(getMsg(err))}`);
     process.exit(1);
   }
 
-  // --- Step 4: Ask for OpenRouter key (optional) ---
-  try {
-    const res = await text({
-      message: `Enter your OpenRouter API key (Required):`,
-      placeholder: "sk-openrouter...",
+  // // --- Step 4: Ask for OpenRouter key (optional) ---
+  // try {
+  //   const res = await text({
+  //     message: `Enter your OpenRouter API key (Required):`,
+  //     placeholder: "sk-openrouter...",
 
-    });
+  //   });
 
-    if (!isCancel(res) && res.trim()) {
-      openRouterKey = res.trim();
-    }
-  } catch (err) {
-    outro(`⚠️ Failed to read OpenRouter key: ${color.yellow(getMsg(err))}`);
-  }
+  //   if (!isCancel(res) && res.trim()) {
+  //     openRouterKey = res.trim();
+  //   }
+  // } catch (err) {
+  //   outro(`⚠️ Failed to read OpenRouter key: ${color.yellow(getMsg(err))}`);
+  // }
 
   const envLines = [
     `SELECTED_LLM=${llm}`,
     `LLM_MODEL=${model}`,
     `${PROVIDERS[llm].keyName}=${llmKey}`,
-    `GOOGLE_CSE_API_KEY=AIzaSyDYGqVZyVcTDdfuO3cgHnpQrV0ealD0Pag`,
-    `GOOGLE_CSE_ID=a5ad26b8dd2f64e96`
   ];
-
-  if (openRouterKey) {
-    envLines.push(`OPEN_ROUTER_API_KEY=${openRouterKey}`);
-  }
-
+  
   try {
-    const ENV_PATH = path.join(targetPath, "/dist/.env");
+    const ENV_PATH = path.join(targetPath, ".env");
 
     const envDir = path.dirname(ENV_PATH);
     if (!fs.existsSync(envDir)) {
@@ -149,7 +143,7 @@ export async function runConfig(targetPath: string): Promise<{
     }
 
     fs.writeFileSync(ENV_PATH, envLines.join("\n") + "\n", "utf-8");
-    outro(`✅ ${color.green(".env file created successfully at")} ${ENV_PATH}`);
+    outro(`✓ ${color.green(".env file created successfully at")} ${ENV_PATH}`);
     return {
       selectedLLM: llm,
       llmModel: model,
@@ -157,7 +151,7 @@ export async function runConfig(targetPath: string): Promise<{
       openRouterKey,
     };
   } catch (err) {
-    outro(`❌ Failed to write .env file: ${color.red(getMsg(err))}`);
+    outro(`✕ Failed to write .env file: ${color.red(getMsg(err))}`);
     process.exit(1);
   }
 }
