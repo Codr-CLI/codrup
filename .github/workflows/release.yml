@@ -4,6 +4,9 @@ on:
       version_changed:
         required: true
         type: string
+    secrets:
+      NPM_TOKEN:
+        required: true
 
 jobs:
   release:
