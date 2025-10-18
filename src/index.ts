@@ -6,28 +6,44 @@ import { runUpdate } from "./commands/update";
 import { runReset } from "./commands/reset";
 import os from "node:os";
 import path from "node:path";
+import fs from "node:fs";
 
 const program = new Command();
-const targetPath = path.join(os.homedir(), ".codr", "config.json");
+const metaPath = path.join(os.homedir(), ".codr", ".metadata.json");
+let metaData = {};
+
+try {
+  if (fs.existsSync(metaPath)) {
+    metaData = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
+  }
+} catch {
+  metaData = {};
+}
 
 program
   .name("codr-installer")
   .description("CLI installer for codr")
-  .version("0.1.0")
+  .version("1.1.0")
   .option("--setup", "Set up the codr CLI tool")
   .option("--config", "Setup environment variables")
   .option("--update", "Update codr to latest version")
   .option("--reset", "Delete and reset codr installation");
 
 program.parse(process.argv);
-const options = program.opts();
 
-if (options.setup) {
-  await runSetup();
-} else if (options.config) {
-  await runConfig(targetPath);
-} else if (options.update) {
-  await runUpdate();
-} else if (options.reset) {
-  await runReset();
+const actions = {
+  setup: runSetup,
+  // @ts-ignore
+  config: () => runConfig(metaData.installPath),
+  update: runUpdate,
+  reset: runReset,
+};
+
+for (const [key, action] of Object.entries(actions)) {
+  if (program.opts()[key]) {
+    await action();
+    process.exit(0);
+  }
 }
+
+program.help();
