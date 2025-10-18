@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: oven-sh/setup-bun@v2
 
@@ -23,10 +25,11 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          npm config set //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+          echo "//registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
           npm publish --access public
+          rm -f ~/.npmrc
 
-      - name: Generate changelog
+      - name: Generate changelog and get version
         id: changelog
         run: |
           VERSION=$(jq -r .version package.json)
@@ -36,7 +39,7 @@ jobs:
           else
             git log "$LAST_TAG"..HEAD --pretty=format:"* %s (%h)" > CHANGELOG.md
           fi
-          echo "changelog_file=CHANGELOG.md" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release with build
         uses: softprops/action-gh-release@v2
