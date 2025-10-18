@@ -1,0 +1,50 @@
+on:
+  workflow_call:
+    inputs:
+      version_changed:
+        required: true
+        type: string
+
+jobs:
+  release:
+    if: ${{ inputs.version_changed == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies and build
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm config set //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+          npm publish --access public
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          VERSION=$(jq -r .version package.json)
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            git log --pretty=format:"* %s (%h)" > CHANGELOG.md
+          else
+            git log "$LAST_TAG"..HEAD --pretty=format:"* %s (%h)" > CHANGELOG.md
+          fi
+          echo "changelog_file=CHANGELOG.md" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release with build
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.changelog.outputs.version }}
+          name: Release v${{ steps.changelog.outputs.version }}
+          body_path: CHANGELOG.md
+          files: |
+            dist/index.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
