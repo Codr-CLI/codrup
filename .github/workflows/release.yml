@@ -9,38 +9,60 @@ jobs:
   release:
     if: ${{ inputs.version_changed == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
+      
       - uses: oven-sh/setup-bun@v2
-
+      
       - name: Install dependencies and build
         run: |
           bun install --frozen-lockfile
           bun run build
-
+      
+      - name: Verify NPM token exists
+        run: |
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "Error: NPM_TOKEN secret is not set"
+            echo "Please add your NPM token to GitHub Secrets"
+            exit 1
+          fi
+      
+      - name: Setup Node for npm publish
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+      
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          echo "//registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
           npm publish --access public
-          rm -f ~/.npmrc
-
+      
       - name: Generate changelog and get version
         id: changelog
         run: |
           VERSION=$(jq -r .version package.json)
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
           if [ -z "$LAST_TAG" ]; then
-            git log --pretty=format:"* %s (%h)" > CHANGELOG.md
+            echo "## 🎉 Initial Release" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            git log --pretty=format:"* %s (%h)" >> CHANGELOG.md
           else
-            git log "$LAST_TAG"..HEAD --pretty=format:"* %s (%h)" > CHANGELOG.md
+            echo "## What's Changed" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            git log "$LAST_TAG"..HEAD --pretty=format:"* %s (%h)" >> CHANGELOG.md
           fi
+          
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-
+      
       - name: Create GitHub Release with build
         uses: softprops/action-gh-release@v2
         with:
@@ -49,5 +71,7 @@ jobs:
           body_path: CHANGELOG.md
           files: |
             dist/index.js
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
